@@ -16,33 +16,69 @@ const svgScatter = d3.select("#scatterPlot")
 d3.csv("colleges.csv").then(data => {
     // 2: ... AND REFORMAT DATA
     data.forEach(d => {
+        // plus sign turns string into number
         d["earnings"] = +d["Median Earnings 8 years After Entry"];
         d["debt"] = +d["Median Debt on Graduation"];
     })
 
+    console.log(data);
+    // console.log(
+    //     "Data type of 'earnings':",
+    //     typeof data[0]["earnings"] // number
+    // )
+
     // 3: SET AXES SCALES
-    //Your code...
+    let xScatter = d3.scaleLinear() // x var is earnings
+        .domain([0, d3.max(data, d => d.earnings)])
+        .range([0, width]);
+
+    let yScatter = d3.scaleLinear() // y var is debt
+        .domain([0, d3.max(data, d => d.debt)])
+        .range([height, 0]); // THINK BACKWARDS FOR Y - start high, decrease after
 
     // 4: PLOT POINTS
-    //Your code...
+    svgScatter.attr("class", "scatter") // CLASS MUST BE AT TOP OF CHAIN!!
+        .selectAll("circle")
+        .data(data)
+        .enter() // enter all points NOT labeled circle
+        .append("circle")
+        .attr("cx", d => xScatter(d.earnings))
+        .attr("cy", d => yScatter(d.debt))
+        .attr("r", 5);
 
     // 5: AXES
     // Add x-axis
-    //Your code...
+    svgScatter.append("g") // <g> groups SVG shapes together
+        .attr("transform", `translate(0,${height})`)
+        .call(d3.axisBottom(xScatter));
     
     // Add y-axis
-    //Your code...
-    
+    svgScatter.append("g")
+        .call(d3.axisLeft(yScatter));
 
     // 6: ADD LABELS
     // Add title
-    //Your code...
+    svgScatter.append("text")
+        .attr("class", "title")
+        .attr("x", width / 2)
+        .attr("y", -margin.top / 2)
+        .text("Median Earnings 8 Years After Entry vs. Median Debt Upon Graduation");
     
     // Add x-axis label
-    //Your code...
+    svgScatter.append("text")
+        .attr("class", "axis-label")
+        .attr("text-anchor", "middle") // center text
+        .attr("x", width / 2) // center horizontally on chart
+        .attr("y", height + margin.bottom - 5) // position below x-axis
+        .text("Median Earnings ($)");
     
     // Add y-axis label
-    //Your code...
+    svgScatter.append("text")
+        .attr("class", "axis-label")
+        .attr("transform", "rotate(-90)") // rotate text for vertical alignment
+        .attr("y", (-margin.left / 2) - 5) // position slightly away from axis
+        .attr("x", -height / 2) // center vertically
+        .text("Median Debt ($)"); 
     
 
     // [optional challenge] 7: ADD TOOL-TIP
